@@ -1,0 +1,26 @@
+{
+    "spare2": {
+        "id": "p2",
+        "name": "Smartphone",
+        "category": "Electronics",
+        "price": 800
+    },
+    "spare3": {
+        "id": "p3",
+        "name": "Chair",
+        "category": "Furniture",
+        "price": 150
+    },
+    "spare4": {
+        "id": "p4",
+        "name": "Desk",
+        "category": "Furniture",
+        "price": 200
+    },
+    "spare5": {
+        "id": "p5",
+        "name": "Headphones",
+        "category": "Electronics",
+        "price": 150
+    }
+}

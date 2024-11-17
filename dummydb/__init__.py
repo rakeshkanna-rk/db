@@ -2,6 +2,7 @@
 from dummydb.query import Query
 from dummydb.database import JsonDB, BsonDB, CSVDB
 from dummydb.cachememory import DatabaseManagement, BinaryDatabaseManagement, CSVDatabaseManagement
+from dummydb.export import ExportManager
 
 # CLI
 from dummydb.cli import cmdline

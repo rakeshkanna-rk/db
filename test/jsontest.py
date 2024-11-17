@@ -48,6 +48,12 @@ print("Deleted spare1\n",
 
 print(f"\n{'-'*20}\nQuery Operators\n")
 
+db.archive(table)
+print("Archived\n")
+
+db.unarchive(table)
+print("Unarchived\n")
+
 # Search with Arthmetic Operators
 query = Query().key("category") == "Furniture"
 equal_case = db.search(table, query)

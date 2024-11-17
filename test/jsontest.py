@@ -14,6 +14,11 @@ db.insert(key="spare3", value={"id": "p3", "name": "Chair", "category": "Furnitu
 db.insert(key="spare4", value={"id": "p4", "name": "Desk", "category": "Furniture", "price": 200})
 db.insert(key="spare5", value={"id": "p5", "name": "Headphones", "category": "Electronics", "price": 150})
 
+# Get DB name
+print(
+    db.getdb(), '\n'
+    )
+
 # Get a value from top level key
 print(
     db.get(key="spare1"), '\n'

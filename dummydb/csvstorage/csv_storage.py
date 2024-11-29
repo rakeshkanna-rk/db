@@ -1,11 +1,8 @@
 import csv
 import os
 from typing import List, Dict, Union
-import logging
 from ..query import Query
-
-# Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+from ..logmsg import log, Status
 
 
 class CSVStorage:
@@ -17,7 +14,9 @@ class CSVStorage:
             db_path (str): Path to the directory where CSV files are stored.
         """
         self.db_path = db_path
-        os.makedirs(self.db_path, exist_ok=True)
+        if not os.path.exists(self.db_path):
+            os.makedirs(self.db_path, exist_ok=True)
+            log(f"Created {self.db_path}, as Database not exist", Status.INFO)
 
     def _get_file_path(self, table: str) -> str:
         """
@@ -41,10 +40,13 @@ class CSVStorage:
         """
         file_path = self._get_file_path(table)
         if os.path.exists(file_path):
-            logging.info("Table %s already exists", table)
+            log(f"{table} already exist", Status.ERROR)
+            exit()
+
         with open(file_path, mode="w", newline="") as fh:
             writer = csv.writer(fh)
             writer.writerow(columns)
+            log(f"Created {table}", Status.DONE)
 
     def insert(self, table: str, row: Dict[str, Union[str, int, float]]):
         """
@@ -56,7 +58,8 @@ class CSVStorage:
         """
         file_path = self._get_file_path(table)
         if not os.path.exists(file_path):
-            logging.error("Table %s does not exist.", table)
+            log(f"{table} does not exist", Status.ERROR)
+            exit()
 
         with open(file_path, mode="a", newline="") as fh:
             writer = csv.DictWriter(fh, fieldnames=row.keys())
@@ -64,6 +67,7 @@ class CSVStorage:
                 # Write header if the file is empty
                 writer.writeheader()
             writer.writerow(row)
+            log(f"Inserted Data sucessfully", Status.DONE)
 
     def fetch_all(self, table: str) -> List[Dict[str, Union[str, int, float]]]:
         """
@@ -77,7 +81,8 @@ class CSVStorage:
         """
         file_path = self._get_file_path(table)
         if not os.path.exists(file_path):
-            logging.error("Table %s does not exist.", table)
+            log(f"{table} does not  exist", Status.ERROR)
+            exit()
 
         with open(file_path, mode="r") as fh:
             reader = csv.DictReader(fh)
@@ -93,8 +98,10 @@ class CSVStorage:
         file_path = self._get_file_path(table)
         if os.path.exists(file_path):
             os.remove(file_path)
+            log(f"{table} Droped", Status.DONE)
         else:
-            logging.error("Table %s does not exist.", table)
+            log(f"{table} does not  exist", Status.ERROR)
+            exit()
 
     def update(self, table: str, condition: callable, update_values: Dict[str, Union[str, int, float]]):
         """
@@ -107,7 +114,8 @@ class CSVStorage:
         """
         file_path = self._get_file_path(table)
         if not os.path.exists(file_path):
-            logging.error("Table %s does not exist.", table)
+            log(f"{table} does not  exist", Status.ERROR)
+            exit()
 
         with open(file_path, mode="r") as fh:
             reader = csv.DictReader(fh)
@@ -123,6 +131,7 @@ class CSVStorage:
             writer = csv.DictWriter(fh, fieldnames=rows[0].keys())
             writer.writeheader()
             writer.writerows(updated_rows)
+            log(f"Rows Updated", Status.DONE)
 
     def search(self, table: str, query: Query) -> List[Dict[str, Union[str, int, float]]]:
         """
@@ -137,7 +146,8 @@ class CSVStorage:
         """
         file_path = self._get_file_path(table)
         if not os.path.exists(file_path):
-            raise FileNotFoundError(f"Table {table} does not exist.")
+            log(f"{table} does not exist", Status.ERROR)
+            exit()
 
         with open(file_path, mode="r") as fh:
             reader = csv.DictReader(fh)

@@ -1,0 +1,27 @@
+
+# Byte-compiled / optimized Python files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+env/
+*.env
+
+# Compiled files
+*.o
+*.class
+*.dll
+*.exe
+
+# Temporary files
+*~
+*.swp
+*.log
+
+# Miscellaneous
+.DS_Store
+.idea/
+.vscode/

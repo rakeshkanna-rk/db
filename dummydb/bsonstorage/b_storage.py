@@ -1,9 +1,8 @@
 import os
 import bson
-import logging
 from ..query import Query
+from ..logmsg import log, Status
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 class BStorage:
     def __init__(self, dbname: str = '.db'):
@@ -11,7 +10,9 @@ class BStorage:
         self.data = {}
 
         # Ensure the database directory exists
-        os.makedirs(self.dbname, exist_ok=True)
+        if not os.path.exists(self.dbname):
+            os.makedirs(self.dbname, exist_ok=True)
+            log(f"Created {self.dbname}, as Database not exist", Status.INFO)
     
     def save(self, table: str):
         """Save current data to the given table."""
@@ -27,11 +28,13 @@ class BStorage:
             with open(table, 'rb') as f:
                 return bson.loads(f.read())
         else:
+            log(f"{table} does not exist, returning {{}}", Status.WARN)
             return {}
 
     def usetable(self, tablename):
         """Use a common table name for all."""
         self.table = tablename
+        log(f"Using {self.table} as default table", Status.INFO)
 
     def insert(self, key, value, table: str = None):
         """Insert the value into the table with key-value pair."""
@@ -47,11 +50,13 @@ class BStorage:
         else:
             # Create an empty BSON file if the table doesn't exist
             self.data = {}
+            log(f"Created {table} as it does not exist", Status.INFO)
         
         # Add the new key-value pair and save the data
         self.data[key] = value
         self.save(table)
         self.data = {}
+        log(f"Inserted {key} sucessfully", Status.DONE)
 
     def get(self, key, table: str = None):
         """Get the value associated with a key."""
@@ -95,8 +100,9 @@ class BStorage:
         if key in load:
             del load[key]
             self.save(table)
+            log(f"{key} deleted from {table}", Status.DONE)
         else:
-            logging.error("%s not found in %s", key, table)
+            log(f"{key} not found in {table}", Status.ERROR)
 
 
     def drop(self, table: str = None):
@@ -107,8 +113,9 @@ class BStorage:
         table = os.path.join(self.dbname, table)
         if os.path.exists(table):
             os.remove(table)
+            log(f"{table} Droped", Status.DONE)
         else:
-            logging.error('File %s Not Found', table)
+            log("Table not found", Status.ERROR)
 
     def update(self, key, new_value, table: str = None):
         """Update the value associated with a key in the table."""
@@ -121,8 +128,9 @@ class BStorage:
         if key in self.data:
             self.data[key] = new_value  # Update the value
             self.save(savetable)
+            log("Updated Value", Status.DONE)
         else:
-            logging.error("%s not found in %s", key, table)
+            log(f"{key} not found in {table}", Status.ERROR)
 
     def search(self, table: str, query: Query):
         data = self.load(table)
@@ -140,6 +148,7 @@ class BStorage:
         table = os.path.join(self.dbname, table)
         with open(table, 'wb') as f:
             f.write(bson.dumps({}))
+            log(f"{table} reset to empty", Status.DONE)
 
     def archive(self, table: str = None):
         """Move the table file to an archive folder."""
@@ -148,15 +157,17 @@ class BStorage:
         
         table_path = os.path.join(self.dbname, table)
         if not os.path.exists(table_path):
-            logging.error("File %s Not Found", table)
+            log(f"Table '{table}' not found", Status.ERROR)
+            exit()
         
         os.makedirs(os.path.join(self.dbname, ".archive"), exist_ok=True)
         transfer_path = os.path.join(self.dbname, ".archive", table)
         if os.path.exists(transfer_path):
-            logging.error("%s already exist in archive", table)
+            log(f"{table} already exist", Status.ERROR)
             exit()
 
         os.rename(table_path, transfer_path)
+        log(f"{table} archived", Status.DONE)
         
     def unarchive(self, table):
         """Move the archived table file back to the main directory."""
@@ -166,10 +177,13 @@ class BStorage:
         table_path = os.path.join(self.dbname, ".archive", table)
 
         if not os.path.exists(table_path):
-            logging.error("File %s not found in archive", table)
+            log(f"Table '{table}' not found", Status.ERROR)
+            exit()
         
         transfer_path = os.path.join(self.dbname, table)
         if os.path.exists(transfer_path):
-            logging.error("%s already exist in Database", table)
+            log(f"{table} already exist", Status.ERROR)
+            exit()
         
         os.rename(table_path, transfer_path)
+        log(f"{table} unarchived", Status.DONE)

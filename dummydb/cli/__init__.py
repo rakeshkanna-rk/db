@@ -1,2 +1,2 @@
 from .cli import cmdline
-from .utils import error, ok, use, splitCmdValue, createDB, useDB, insertValue
+from .utils import error, use, createDB, useTable, insertValue

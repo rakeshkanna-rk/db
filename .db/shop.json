@@ -1,0 +1,13 @@
+{
+    "item01": {
+        "test":{"nestkey":45},
+        "rice": 400,
+        "price": 200
+    },
+    "item02": {
+        "maidha": 800,
+        "price": 300
+    },
+    "dd": 5555,
+    "dd5": 5555
+}

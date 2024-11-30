@@ -1,0 +1,5 @@
+# Line Of Configuration (LOC) file = .pyscripts [Sat Nov 30 11:01:32 2024]
+
+[py.cli]
+cmd = python test/cli_test.py
+jtest = python test/jsontest.py

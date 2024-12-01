@@ -68,11 +68,11 @@ and_case = db.search(table, query)
 print("Electronics priced >= 500:\n", and_case, "\n")
 
 query = Query.OR(
-    Query().key("name") == "Laptop", 
+    Query().key("name") == "Desk", 
     Query().key("price") == 150
 )
 or_case = db.search(table, query)
-print("Laptop or priced 150:\n", or_case)
+print("Desk or priced 150:\n", or_case)
 
 # Drop (delete) a table file
 choose = input("\nDrop table? (y/n) ") 

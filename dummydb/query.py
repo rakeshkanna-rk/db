@@ -71,20 +71,3 @@ class Query:
                 return False
         return True
 
-
-
-
-
-# class CombinedQuery:
-#     def __init__(self, left, right, op):
-#         self.left = left
-#         self.right = right
-#         self.op = op
-
-#     def test(self, document):
-#         """Evaluate combined query based on the logical operator."""
-#         if self.op == 'and':
-#             return self.left.test(document) and self.right.test(document)
-#         elif self.op == 'or':
-#             return self.left.test(document) or self.right.test(document)
-#         return False

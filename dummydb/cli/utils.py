@@ -5,6 +5,7 @@ import json
 
 from ..database import JsonDB, BsonDB
 from ..logmsg import log, Status
+from ..query import Query
 
 def error(cmd, type, hint):
 
@@ -61,22 +62,6 @@ def createDB(cmd:str) -> JsonDB | None:
 
     return db
 
-def useTable(cmd: str, db: JsonDB | None):
-    cmd = cmd.split()
-
-    if len(cmd) == 2:
-        if not db: db = createDB("CREATE DB")
-
-        try:
-            db.usetable(cmd[1])
-            
-        except Exception as e:
-            log(f"Exception: {e}", Status.ERROR)
-
-        return
-    else:
-        log("Syntax error: USE <TABLE.json>", Status.ERROR)
-    
 
 def insertValue(cmd:str , db: JsonDB | BsonDB | None) -> None:
 
@@ -143,4 +128,203 @@ def deleteValue(cmd:str, db: JsonDB | None) -> None:
     elif not len(cmd.split()) == 4 or not cmd.split()[2].upper()=="FROM" :
         log("Syntax Error - Usage: DEL <KEY> FROM <TABLE>", Status.ERROR)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from typing import Any
+
+def convert_value(value: str) -> Any:
+    """
+    Converts a string value to an int or float if it's numeric, else returns the original string.
+    """
+    try:
+        # Try converting the value to a float (for numbers with decimals) or int
+        if "." in value:
+            return float(value)
+        return int(value)
+    except ValueError:
+        return value  # If it's not numeric, return the string
+
+
+def searchQuery2(cmd: str, db: JsonDB | None):
+    if not db:
+        log("Initialize Database before selecting items", Status.WARN)
+        log("Usage: USE DB <DB-NAME>", Status.INFO)
+        return
     
+    cmd = cmd.replace("search", "SEARCH")
+    cmd = cmd.replace("and", "AND")
+    cmd = cmd.replace("or", "OR")
+    cmd = cmd.replace("from", "FROM")
+
+    split_cmd = cmd.split()
+    query = split_cmd[1:-2]
+    table = split_cmd[-1]
+
+    qc = Query()
+    all_query = []
+
+    is_and = None
+    is_or = None
+
+    for word in query:
+        if word.upper() == 'AND':
+            is_and = True
+        elif word.upper() == 'OR':
+            is_or = True
+        else:
+            normal = True
+
+    if is_and and is_or:
+        log("Combined Queries under development", Status.WARN)
+    
+    elif is_and and not is_or:
+        queries = " ".join(query).split("AND")
+
+        for word in queries:
+
+            word = word.strip()
+
+            if "==" in word:
+                key, value = word.split("==")
+                key = key.strip().strip('"')   
+                value = value.strip().strip('"')
+                value = convert_value(value)
+                set_query = Query().key(key) == value
+                all_query.append(set_query)
+
+            elif "!=" in word:
+                key, value = word.split("!=")
+                key = key.strip().strip('"')   
+                value = value.strip().strip('"')
+                value = convert_value(value)
+                set_query = Query().key(key) != value
+                all_query.append(set_query)
+
+            elif "<=" in word:
+                key, value = word.split("<=")
+                key = key.strip().strip('"')   
+                value = value.strip().strip('"')
+                value = convert_value(value)
+                set_query = Query().key(key) <= value
+                all_query.append(set_query)
+
+
+            elif ">=" in word:
+                key, value = word.split(">=")
+                key = key.strip().strip('"')   
+                value = value.strip().strip('"')
+                value = convert_value(value)
+                set_query = Query().key(key) >= value
+                all_query.append(set_query)
+
+            elif "<" in word:
+                key, value = word.split("<")
+                key = key.strip().strip('"')   
+                value = value.strip().strip('"')
+                value = convert_value(value)
+                set_query = Query().key(key) < value
+                all_query.append(set_query)
+
+            elif ">" in word:
+                key, value = word.split(">")
+                key = key.strip().strip('"')   
+                value = value.strip().strip('"')
+                value = convert_value(value)
+                set_query = Query().key(key) > value
+                all_query.append(set_query)            
+
+        combined_query = Query.AND(all_query[0], *all_query[1:])
+
+    elif not is_and and is_or:
+        queries = " ".join(query).split("OR")
+
+        for word in queries:
+            word = word.strip()
+
+            if "==" in word:
+                key, value = word.split("==")
+                key = key.strip().strip('"')   
+                value = value.strip().strip('"')
+                value = convert_value(value)
+                set_query = Query().key(key) == value
+                all_query.append(set_query)
+
+            elif "!=" in word:
+                key, value = word.split("!=")
+                key = key.strip().strip('"')   
+                value = value.strip().strip('"')
+                value = convert_value(value)
+                set_query = Query().key(key) != value
+                all_query.append(set_query)
+
+            elif "<=" in word:
+                key, value = word.split("<=")
+                key = key.strip().strip('"')   
+                value = value.strip().strip('"')
+                value = convert_value(value)
+                set_query = Query().key(key) <= value
+                all_query.append(set_query)
+
+
+            elif ">=" in word:
+                key, value = word.split(">=")
+                key = key.strip().strip('"')   
+                value = value.strip().strip('"')
+                value = convert_value(value)
+                set_query = Query().key(key) >= value
+                all_query.append(set_query)
+
+            elif "<" in word:
+                key, value = word.split("<")
+                key = key.strip().strip('"')   
+                value = value.strip().strip('"')
+                value = convert_value(value)
+                set_query = Query().key(key) < value
+                all_query.append(set_query)
+
+            elif ">" in word:
+                key, value = word.split(">")
+                key = key.strip().strip('"')   
+                value = value.strip().strip('"')
+                value = convert_value(value)
+                set_query = Query().key(key) > value
+                all_query.append(set_query) 
+
+        combined_query = Query.OR(all_query[0], *all_query[1:])
+
+    results = db.search(table, combined_query)
+    print("Search Results: \n", json.dumps(results, indent=4))
+    all_query = []
+
+
+
+
+
+

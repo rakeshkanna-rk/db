@@ -7,6 +7,8 @@ def check(cmd: str, keyword: str) -> bool:
 
 def cmdline():
     db = None
+    print("\tWelcome to DummyDB CLI\n")
+    
 
     loop = True
     while loop:
@@ -21,23 +23,16 @@ def cmdline():
                     db = createDB(cmd)
                 elif check(cmd.upper(), "USE"):
                     if (
-                        cmd.split()[-1].endswith(".json") or 
-                        cmd.split()[-1].endswith(".bson")
+                        len(cmd.split()) == 3 and 
+                        cmd.split()[-1].strip().startswith(".") and 
+                        cmd.split()[1].upper() == "DB" and 
+                        os.path.exists(cmd.split()[-1])
                         ):
-                        if os.path.exists(cmd.split()[-1]):
-                            table = useTable(cmd, db)
+                        db = JsonDB(cmd.split()[-1])
+                    elif not os.path.exists(cmd.split()[-1]):
+                        log("Database does not exist", Status.ERROR)
                     else:
-                        if (
-                            len(cmd.split()) == 3 and 
-                            cmd.split()[-1].strip().startswith(".") and 
-                            cmd.split()[1].upper() == "DB" and 
-                            os.path.exists(cmd.split()[-1])
-                            ):
-                            db = JsonDB(cmd.split()[-1])
-                        elif not os.path.exists(cmd.split()[-1]):
-                            log("Database does not exist", Status.ERROR)
-                        else:
-                            log("Prefer using dot notation for database", Status.WARN)
+                        log("Prefer using dot notation for database", Status.WARN)
 
                 elif check(cmd.upper(), "INSERT INTO"):
                     insertValue(cmd, db)
@@ -47,6 +42,9 @@ def cmdline():
 
                 elif check(cmd.upper(), "DEL"):
                     deleteValue(cmd, db)
+
+                elif check(cmd.upper(), "SEARCH"):
+                    searchQuery2(cmd, db)
                 
                 elif not cmd:
                     continue
